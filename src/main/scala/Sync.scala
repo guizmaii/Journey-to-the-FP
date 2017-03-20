@@ -12,7 +12,8 @@ object Sync extends App {
   }
 
   def xSecondsOfWorks(x: Int)(i: Int): Unit = {
-    bench(s"Before: $i")(millisPassed => s"After: $i - $millisPassed") {
+    val threadName = Thread.currentThread().getName
+    bench(s"Before: $threadName - $i")(millisPassed => s"After : $threadName - $i. Time passed: $millisPassed") {
       Thread.sleep(x.seconds.toMillis)
     }
   }
