@@ -1,13 +1,12 @@
 import java.util.concurrent.Executor
 
-//import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
 object OneAsync extends App {
 
   implicit val synchronousExecutionContext: ExecutionContext = ExecutionContext.fromExecutor(new Executor {
-    def execute(task: Runnable) = task.run()
+    def execute(task: Runnable): Unit = task.run()
   })
 
   def xSecondsOfWorks(x: Int)(i: Int): Future[Unit] = {
