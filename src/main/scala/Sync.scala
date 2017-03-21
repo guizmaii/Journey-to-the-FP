@@ -18,10 +18,7 @@ object Sync extends App {
     }
   }
 
-  override def main(args: Array[String]): Unit = {
-    bench("BEFORE ALL")(millisPassed => s"AFTER ALL $millisPassed") {
-      0 to 9 foreach xSecondsOfWorks(1)
-    }
+  bench("BEFORE ALL")(millisPassed => s"AFTER ALL $millisPassed") {
+    0 to 9 foreach xSecondsOfWorks(1)
   }
-
 }
