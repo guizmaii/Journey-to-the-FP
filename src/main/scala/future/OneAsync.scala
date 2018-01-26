@@ -1,3 +1,5 @@
+package future
+
 import java.util.concurrent.Executor
 
 import scala.concurrent.duration._

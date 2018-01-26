@@ -1,3 +1,5 @@
+package future
+
 import java.util.concurrent.ConcurrentHashMap
 
 import scala.collection.immutable.IndexedSeq

@@ -1,3 +1,5 @@
+package future
+
 import scala.concurrent.duration._
 
 object Sync extends App {
