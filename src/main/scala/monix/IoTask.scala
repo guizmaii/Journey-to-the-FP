@@ -13,6 +13,9 @@ object IoTask extends App {
 
   final val io = Scheduler.io()
 
+  /**
+    * Thanks to Piotr Gawryś (@Avasil) for this !
+    */
   object IoTask {
     def apply[A](a: => A): Task[A] = Task(a).executeOn(io).asyncBoundary
   }
