@@ -13,12 +13,8 @@ object IoTask extends App {
 
   final val io = Scheduler.io()
 
-  final case class IoTask[A](task: Task[A]) extends AnyVal
   object IoTask {
-    def apply[A](a: => A): IoTask[A] = new IoTask(Task(a))
-    implicit def asTask[A](ioTask: IoTask[A]): Task[A] = {
-      ioTask.task.executeOn(io).asyncBoundary
-    }
+    def apply[A](a: => A): Task[A] = Task(a).executeOn(io).asyncBoundary
   }
 
   final case class User(name: String) extends AnyVal
