@@ -17,7 +17,7 @@ object IoTask extends App {
     * Thanks to Piotr Gawryś (@Avasil) for this !
     */
   object IoTask {
-    def apply[A](a: => A): Task[A] = Task(a).executeOn(io).asyncBoundary
+    def apply[A](a: => A): Task[A] = Task.eval(a).executeOn(io).asyncBoundary
   }
 
   final case class User(name: String) extends AnyVal
