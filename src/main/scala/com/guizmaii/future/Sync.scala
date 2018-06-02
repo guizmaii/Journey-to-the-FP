@@ -1,4 +1,4 @@
-package future
+package com.guizmaii.future
 
 import scala.concurrent.duration._
 
