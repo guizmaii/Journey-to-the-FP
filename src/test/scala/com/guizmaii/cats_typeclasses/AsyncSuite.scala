@@ -1,12 +1,25 @@
 package com.guizmaii.cats_typeclasses
 
+import cats.Show
 import com.guizmaii.BaseTestSuite
 import monix.eval.Task
 import monix.execution.schedulers.TestScheduler
 
 import scala.collection.concurrent.TrieMap
 import scala.concurrent.Future
-import scala.concurrent.duration._
+
+sealed trait EffectSystem extends Product with Serializable
+case object Monix         extends EffectSystem
+case object CatsEffect    extends EffectSystem
+
+object EffectSystem {
+  implicit final val show: Show[EffectSystem] = new Show[EffectSystem] {
+    override def show(e: EffectSystem): String = e match {
+      case Monix      => "Monix"
+      case CatsEffect => "Cats"
+    }
+  }
+}
 
 /**
   * Everything is inspired by (actually, it's almost only copied from): https://gist.github.com/kevinmeredith/1812c2bc221a5adc8bae0f29104cc4e5
@@ -27,8 +40,8 @@ object AsyncSuite extends BaseTestSuite {
 
   object AIO {
     // TODO Jules: Can we simplify this part ?
-    def apply[F[_]](duration: FiniteDuration)(implicit F: Concurrent[F], timer: Timer[F]) =
-      timer.sleep(duration) >> F.async[Unit] { cb =>
+    def apply[F[_]]()(implicit F: Concurrent[F], timer: Timer[F]): F[Unit] =
+      timer.shift >> F.async[Unit] { cb =>
         cb(Right(concurrentMap.update(Thread.currentThread().getName, "")))
       }
   }
@@ -38,23 +51,51 @@ object AsyncSuite extends BaseTestSuite {
     super.tearDown(env)
   }
 
-  def launchTest[F[_]: Concurrent: Par: Timer](name: String)(runAsync: F[_] => Future[Unit]): Future[Unit] = {
-    // The `.parTraverse` is crucial here to parallelize the calls.
-    // If you replace it by its sequential equivalent, `.traverse`, the execution will take 30 x 1 second to finish.
-    val f = (0 to 500).toList.parTraverse(_ => AIO.apply(1.second))
+  def launchTest[F[_]: Concurrent: Par: Timer](
+      effectSystem: EffectSystem
+  )(runAsync: F[_] => Future[Unit])(implicit show: Show[EffectSystem]): Future[Unit] = {
+
+    // The `.parTraverse` seems to be important here to parallelize the calls.
+    //
+    // But, If you replace it by its sequential equivalent, `.traverse`, the execution will also use more than 1 thread.
+    // The difference seems to be that with `.parTraverse` more threads will be used.
+    //
+    // TODO: Does the execution parralelized even whitout the `.parTraverse` ? To Check !
+    //
+    val f = (0 to 500).toList.parTraverse(_ => AIO.apply())
 
     assertEquals(concurrentMap.isEmpty, true)
 
     runAsync {
       f.map { _ =>
-        concurrentMap.foreach(tp => println(s"---> $name $tp"))
+        concurrentMap.foreach(tp => println(s"---> ${effectSystem.show} $tp"))
         println("")
 
         // This test is here to verify that more than one thread has been used.
         //
-        // After observation, it turns out that both Cats and Monix use n threads, n being the numbers of cores on your machine.
-        // I think that it's because they both use the Scala default EC which is booted with n threads.
-        assert(concurrentMap.size == Runtime.getRuntime.availableProcessors())
+        // After observation, it turns out that:
+        //
+        // 1. With 500 `AIO`:
+        //  - Monix uses `n` threads
+        //  - Cats uses `n - 1` threads (I didn't tested on a monocore machine)
+        //
+        // 2. With 10.000 `AIO`:
+        //  - Monix and Cats uses `n` threads
+        //
+        // `n` being the numbers of cores on your machine.
+        //
+        // I think that the fact that `n` has a relation with number of cores in the machine
+        // is because they both use the Scala default EC, which is booted with n threads.
+        //
+        // TODO: For now, I don't know why Cats use `n - 1` in the case `1.`. To Check !
+        //
+        val expectedNumberOfThreadUsed =
+          effectSystem match {
+            case Monix      => Runtime.getRuntime.availableProcessors()
+            case CatsEffect => Runtime.getRuntime.availableProcessors() - 1
+          }
+
+        assert(concurrentMap.size == expectedNumberOfThreadUsed)
       }
     }
   }
@@ -62,13 +103,13 @@ object AsyncSuite extends BaseTestSuite {
   testAsync("With Monix Task") { _ =>
     import monix.execution.Scheduler.Implicits.global
 
-    launchTest[Task]("Monix")(_.runAsync.asInstanceOf[Future[Unit]])
+    launchTest[Task](Monix)(_.runAsync.asInstanceOf[Future[Unit]])
   }
 
   testAsync("With Cats IO") { _ =>
     import scala.concurrent.ExecutionContext.Implicits.global
 
-    launchTest[IO]("Cats")(_.unsafeToFuture.asInstanceOf[Future[Unit]])
+    launchTest[IO](CatsEffect)(_.unsafeToFuture.asInstanceOf[Future[Unit]])
   }
 
 }
