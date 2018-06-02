@@ -27,11 +27,9 @@ object AsyncSuite extends BaseTestSuite {
 
   object AIO {
     // TODO Jules: Can we simplify this part ?
-    def apply[F[_]]()(implicit F: Concurrent[F], timer: Timer[F]): F[Fiber[F, Unit]] =
-      Concurrent[F].start {
-        timer.sleep(1.second) >> F.async[Unit] { cb =>
-          cb(Right(concurrentMap.update(Thread.currentThread().getName, "")))
-        }
+    def apply[F[_]](duration: FiniteDuration)(implicit F: Concurrent[F], timer: Timer[F]) =
+      timer.sleep(duration) >> F.async[Unit] { cb =>
+        cb(Right(concurrentMap.update(Thread.currentThread().getName, "")))
       }
   }
 
@@ -41,7 +39,9 @@ object AsyncSuite extends BaseTestSuite {
   }
 
   def launchTest[F[_]: Concurrent: Par: Timer](name: String)(runAsync: F[_] => Future[Unit]): Future[Unit] = {
-    val f = (0 to 100).toList.map(_ => AIO.apply()).parTraverse(_.flatMap(_.join))
+    // The `.parTraverse` is crucial here to parallelize the calls.
+    // If you replace it by its sequential equivalent, `.traverse`, the execution will take 30 x 1 second to finish.
+    val f = (0 to 500).toList.parTraverse(_ => AIO.apply(1.second))
 
     assertEquals(concurrentMap.isEmpty, true)
 
@@ -50,7 +50,11 @@ object AsyncSuite extends BaseTestSuite {
         concurrentMap.foreach(tp => println(s"---> $name $tp"))
         println("")
 
-        assert(concurrentMap.size > 1) // Should use more than one thread to do the job.
+        // This test is here to verify that more than one thread has been used.
+        //
+        // After observation, it turns out that both Cats and Monix use n threads, n being the numbers of cores on your machine.
+        // I think that it's because they both use the Scala default EC which is booted with n threads.
+        assert(concurrentMap.size == Runtime.getRuntime.availableProcessors())
       }
     }
   }

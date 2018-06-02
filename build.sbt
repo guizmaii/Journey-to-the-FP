@@ -18,3 +18,5 @@ libraryDependencies += "io.monix"          %% "minitest"      % "2.1.1" % Test
 libraryDependencies += "io.monix"          %% "minitest-laws" % "2.1.1" % Test
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
+
+scalacOptions := scalacOptions.value.filter(_ != "-Xfatal-warnings")
