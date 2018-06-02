@@ -8,14 +8,16 @@ object Sync extends App {
     println(beforePrint)
     val before = System.currentTimeMillis()
     f
-    val after = System.currentTimeMillis()
+    val after                  = System.currentTimeMillis()
     val millisPassed: Duration = (after.milliseconds - before.milliseconds).toSeconds.seconds
     println(afterPrint(millisPassed))
   }
 
   def xSecondsOfWorks(x: Int)(i: Int): Unit = {
     val threadName = Thread.currentThread().getName
-    bench(s"Before: $threadName - $i")(millisPassed => s"After : $threadName - $i. Time passed: $millisPassed") {
+    bench(s"Before: $threadName - $i")(
+      millisPassed => s"After : $threadName - $i. Time passed: $millisPassed"
+    ) {
       Thread.sleep(x.seconds.toMillis)
     }
   }
