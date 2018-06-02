@@ -1,25 +1,23 @@
-package com.guizmaii.monix
+package com.guizmaii.cats_io
 
-import monix.eval.Task
-import monix.execution.Scheduler
+import cats.effect.IO
+import com.guizmaii.BaseTestSuite
 import monix.execution.schedulers.TestScheduler
 
 import scala.collection.concurrent.TrieMap
 
-object IoTaskSuite extends BaseTestSuite {
+object BlockingIOSuite extends BaseTestSuite {
+
+  import cats.syntax.apply._
+
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   test("true should be true") { _ =>
     assertEquals(true, true)
   }
 
-  implicit val global: Scheduler = _root_.monix.execution.Scheduler.global
-  val io                         = _root_.monix.execution.Scheduler.io()
-
-  /**
-    * Thanks to Piotr Gawryś (@Avasil) for this !
-    */
-  object IoTask {
-    @inline final def apply[A](a: => A): Task[A] = Task.eval(a).executeOn(io).asyncBoundary
+  object BlockingIO {
+    @inline final def apply[A](a: => A): IO[A] = IO.shift(_root_.monix.execution.Scheduler.io()) *> IO(a) <* IO.shift
   }
 
   final val concurrentMap: TrieMap[String, String] = TrieMap.empty[String, String]
@@ -34,15 +32,14 @@ object IoTaskSuite extends BaseTestSuite {
 
   testAsync("IoTask should execute its code on its Scheduler") { _ =>
     val f =
-      Task
-        .apply { body("a") }
-        .flatMap(_ => IoTask { body("b") })
-        .flatMap(_ => Task.eval { body("c") })
-        .flatMap(_ => Task.apply { body("d") })
+      IO.apply { body("a") }
+        .flatMap(_ => BlockingIO { body("b") })
+        .flatMap(_ => IO.pure { body("c") })
+        .flatMap(_ => IO.apply { body("d") })
 
     assertEquals(concurrentMap.isEmpty, true)
 
-    f.runAsync.map { _ =>
+    f.unsafeToFuture.map { _ =>
       assert(concurrentMap("a").contains("scala-execution-context-global"))
       assert(concurrentMap("b").contains("monix-io"))
       assert(concurrentMap("c").contains("scala-execution-context-global"))

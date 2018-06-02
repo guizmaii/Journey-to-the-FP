@@ -1,4 +1,4 @@
-package com.guizmaii.monix
+package com.guizmaii
 
 /*
  * Copyright (c) 2014-2018 by The Monix Project Developers.
@@ -19,7 +19,7 @@ package com.guizmaii.monix
 
 import minitest.TestSuite
 import minitest.laws.Checkers
-import monix.execution.schedulers.TestScheduler
+import _root_.monix.execution.schedulers.TestScheduler
 
 /**
   * Copied from Monix test suite.
