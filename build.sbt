@@ -10,9 +10,11 @@ crossScalaVersions := Seq(scala211, scala212)
 
 scalafmtOnCompile in ThisBuild := true
 
-libraryDependencies += "io.monix"      %% "monix"         % "3.0.0-RC1"
-libraryDependencies += "org.typelevel" %% "cats-effect"   % "1.0.0-RC"
-libraryDependencies += "io.monix"      %% "minitest"      % "2.1.1" % Test
-libraryDependencies += "io.monix"      %% "minitest-laws" % "2.1.1" % Test
+libraryDependencies += "io.monix"          %% "monix"         % "3.0.0-RC1"
+libraryDependencies += "org.typelevel"     %% "cats-core"     % "1.0.1"
+libraryDependencies += "org.typelevel"     %% "cats-effect"   % "1.0.0-RC"
+libraryDependencies += "io.chrisdavenport" %% "cats-par"      % "0.1.0"
+libraryDependencies += "io.monix"          %% "minitest"      % "2.1.1" % Test
+libraryDependencies += "io.monix"          %% "minitest-laws" % "2.1.1" % Test
 
 testFrameworks += new TestFramework("minitest.runner.Framework")
