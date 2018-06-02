@@ -55,9 +55,9 @@ object AsyncSuite extends BaseTestSuite {
       effectSystem: EffectSystem
   )(runAsync: F[_] => Future[Unit])(implicit show: Show[EffectSystem]): Future[Unit] = {
 
-    // The `.parTraverse` seems to be important here to parallelize the calls.
+    // The `.parTraverse` is important here to parallelize the calls.
     //
-    // But, If you replace it by its sequential equivalent, `.traverse`, the execution will also use more than 1 thread.
+    // But, if you replace it by its sequential equivalent, `.traverse`, the execution will also use more than 1 thread.
     // The difference seems to be that with `.parTraverse` more threads will be used.
     //
     // TODO: Does the execution parralelized even whitout the `.parTraverse` ? To Check !
@@ -72,30 +72,30 @@ object AsyncSuite extends BaseTestSuite {
         println("")
 
         // This test is here to verify that more than one thread has been used.
+        // So, that the programe is parallelized.
         //
         // After observation, it turns out that:
         //
         // 1. With 500 `AIO`:
-        //  - Monix uses `n` threads
-        //  - Cats uses `n - 1` threads (I didn't tested on a monocore machine)
+        //  - Monix uses `n` threads. Always (or it looks like always).
+        //  - Cats uses at most `n` threads. On my 8 cores machine, sometimes it uses 6, sometimes 7, sometimes 8 but rarely 8.
         //
         // 2. With 10.000 `AIO`:
         //  - Monix and Cats uses `n` threads
         //
         // `n` being the numbers of cores on your machine.
         //
-        // I think that the fact that `n` has a relation with number of cores in the machine
-        // is because they both use the Scala default EC, which is booted with n threads.
+        // I think that the fact that `n` has a relation with number of cores of the machine
+        // is because they both use the Scala default EC, which is booted with `n` threads.
         //
-        // TODO: For now, I don't know why Cats use `n - 1` in the case `1.`. To Check !
+        // TODO: For now, I don't know why Cats seems to use less thread than Cats in some cases. To Check !
         //
-        val expectedNumberOfThreadUsed =
-          effectSystem match {
-            case Monix      => Runtime.getRuntime.availableProcessors()
-            case CatsEffect => Runtime.getRuntime.availableProcessors() - 1
-          }
-
-        assert(concurrentMap.size == expectedNumberOfThreadUsed)
+        effectSystem match {
+          case Monix =>
+            assert(concurrentMap.size == Runtime.getRuntime.availableProcessors())
+          case CatsEffect =>
+            assert(concurrentMap.size > 1 && concurrentMap.size <= Runtime.getRuntime.availableProcessors())
+        }
       }
     }
   }
