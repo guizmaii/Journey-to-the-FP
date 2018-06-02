@@ -5,7 +5,7 @@ import monix.execution.Scheduler
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.language.{implicitConversions, postfixOps}
+import scala.language.postfixOps
 
 object IoTask extends App {
 
@@ -24,7 +24,7 @@ object IoTask extends App {
 
   def getUserName(id: String): Task[String] = Task {
     println(s"getUserName: ${Thread.currentThread()}")
-    "username"
+    s"username - $id"
   }
 
   def blockingGetUser(name: String): Task[User] = IoTask {
