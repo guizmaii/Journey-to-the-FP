@@ -1,6 +1,7 @@
 package com.guizmaii.monix
 
 import com.guizmaii.BaseTestSuite
+import com.guizmaii.utils.ScalaUtils.globalExecutionThreadPoolName
 import monix.eval.Task
 import monix.execution.Scheduler
 import monix.execution.schedulers.TestScheduler
@@ -44,10 +45,10 @@ object BlockingTaskSuite extends BaseTestSuite {
     assertEquals(concurrentMap.isEmpty, true)
 
     f.runAsync.map { _ =>
-      assert(concurrentMap("a").contains("scala-execution-context-global"))
+      assert(concurrentMap("a").contains(globalExecutionThreadPoolName))
       assert(concurrentMap("b").contains("monix-io"))
-      assert(concurrentMap("c").contains("scala-execution-context-global"))
-      assert(concurrentMap("d").contains("scala-execution-context-global"))
+      assert(concurrentMap("c").contains(globalExecutionThreadPoolName))
+      assert(concurrentMap("d").contains(globalExecutionThreadPoolName))
     }
   }
 

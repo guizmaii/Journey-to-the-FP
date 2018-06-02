@@ -2,6 +2,7 @@ package com.guizmaii.cats_io
 
 import cats.effect.IO
 import com.guizmaii.BaseTestSuite
+import com.guizmaii.utils.ScalaUtils.globalExecutionThreadPoolName
 import monix.execution.schedulers.TestScheduler
 
 import scala.collection.concurrent.TrieMap
@@ -40,10 +41,10 @@ object BlockingIOSuite extends BaseTestSuite {
     assertEquals(concurrentMap.isEmpty, true)
 
     f.unsafeToFuture.map { _ =>
-      assert(concurrentMap("a").contains("scala-execution-context-global"))
+      assert(concurrentMap("a").contains(globalExecutionThreadPoolName))
       assert(concurrentMap("b").contains("monix-io"))
-      assert(concurrentMap("c").contains("scala-execution-context-global"))
-      assert(concurrentMap("d").contains("scala-execution-context-global"))
+      assert(concurrentMap("c").contains(globalExecutionThreadPoolName))
+      assert(concurrentMap("d").contains(globalExecutionThreadPoolName))
     }
   }
 
