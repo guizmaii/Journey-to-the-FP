@@ -1,4 +1,4 @@
-package future
+package com.guizmaii.future
 
 import java.util.concurrent.Executor
 

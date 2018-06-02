@@ -1,4 +1,4 @@
-package monix
+package com.guizmaii.monix
 
 import monix.eval.Task
 import monix.execution.Scheduler
