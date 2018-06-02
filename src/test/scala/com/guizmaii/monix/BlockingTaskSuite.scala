@@ -15,7 +15,7 @@ object BlockingTaskSuite extends BaseTestSuite {
   }
 
   implicit val global: Scheduler = _root_.monix.execution.Scheduler.global
-  val io                         = _root_.monix.execution.Scheduler.io()
+  val io: Scheduler              = _root_.monix.execution.Scheduler.io()
 
   /**
     * Thanks to Piotr Gawryś (@Avasil) for this !

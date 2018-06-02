@@ -9,13 +9,13 @@ import scala.collection.concurrent.TrieMap
 
 object BlockingIOSuite extends BaseTestSuite {
 
-  import cats.syntax.apply._
-
-  import scala.concurrent.ExecutionContext.Implicits.global
-
   test("true should be true") { _ =>
     assertEquals(true, true)
   }
+
+  import cats.syntax.apply._
+
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   object BlockingIO {
     @inline final def apply[A](a: => A): IO[A] = IO.shift(_root_.monix.execution.Scheduler.io()) *> IO(a) <* IO.shift
