@@ -31,7 +31,7 @@ object BlockingIOSuite extends BaseTestSuite {
     super.tearDown(env)
   }
 
-  testAsync("IoTask should execute its code on its Scheduler") { _ =>
+  testAsync("BlockingIO should execute its code on its Scheduler") { _ =>
     val f =
       IO.apply { body("a") }
         .flatMap(_ => BlockingIO { body("b") })

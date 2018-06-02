@@ -34,7 +34,7 @@ object BlockingTaskSuite extends BaseTestSuite {
     super.tearDown(env)
   }
 
-  testAsync("IoTask should execute its code on its Scheduler") { _ =>
+  testAsync("BlockingTask should execute its code on its Scheduler") { _ =>
     val f =
       Task
         .apply { body("a") }
