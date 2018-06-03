@@ -40,9 +40,9 @@ object AsyncSuite extends BaseTestSuite {
 
   object AIO {
     // TODO Jules: Can we simplify this part ?
-    def apply[F[_]]()(implicit F: Async[F], timer: Timer[F]): F[Unit] =
-      timer.shift >> F.async[Unit] { cb =>
-        cb(Right(concurrentMap.update(Thread.currentThread().getName, "")))
+    def apply[F[_]]()(implicit F: Sync[F], timer: Timer[F]): F[Unit] =
+      timer.shift >> F.delay {
+        concurrentMap.update(Thread.currentThread().getName, "")
       }
   }
 
@@ -51,7 +51,7 @@ object AsyncSuite extends BaseTestSuite {
     super.tearDown(env)
   }
 
-  def launchTest[F[_]: Async: Par: Timer](
+  def launchTest[F[_]: Sync: Par: Timer](
       effectSystem: EffectSystem
   )(runAsync: F[_] => Future[Unit])(implicit show: Show[EffectSystem]): Future[Unit] = {
 
