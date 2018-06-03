@@ -69,7 +69,8 @@ object AsyncSuite extends BaseTestSuite {
     runAsync {
       f.map { _ =>
         concurrentMap.foreach(tp => println(s"---> ${effectSystem.show} $tp"))
-        println("")
+        println(s"number of thread used: ${concurrentMap.size}")
+        println()
 
         // This test is here to verify that more than one thread has been used.
         // So, that the programe is parallelized.
