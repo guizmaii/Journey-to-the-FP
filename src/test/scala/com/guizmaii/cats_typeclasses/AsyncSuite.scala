@@ -77,8 +77,7 @@ object AsyncSuite extends BaseTestSuite {
         // After observation, it turns out that:
         //
         // 1. With 500 `AIO`:
-        //  - Monix uses `n` threads. Always (or it looks like always).
-        //  - Cats uses at most `n` threads. On my 8 cores machine, sometimes it uses 6, sometimes 7, sometimes 8 but rarely 8.
+        //  - Monix and Cats uses at most `n` threads. On my 8 cores machine, sometimes it uses 6, sometimes 7, sometimes 8 but rarely 8.
         //
         // 2. With 10.000 `AIO`:
         //  - Monix and Cats uses `n` threads
@@ -88,14 +87,7 @@ object AsyncSuite extends BaseTestSuite {
         // I think that the fact that `n` has a relation with number of cores of the machine
         // is because they both use the Scala default EC, which is booted with `n` threads.
         //
-        // TODO: For now, I don't know why Cats seems to use less thread than Cats in some cases. To Check !
-        //
-        effectSystem match {
-          case Monix =>
-            assert(concurrentMap.size == Runtime.getRuntime.availableProcessors())
-          case CatsEffect =>
-            assert(concurrentMap.size > 1 && concurrentMap.size <= Runtime.getRuntime.availableProcessors())
-        }
+        assert(concurrentMap.size > 1 && concurrentMap.size <= Runtime.getRuntime.availableProcessors())
       }
     }
   }
