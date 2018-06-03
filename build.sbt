@@ -1,4 +1,4 @@
-name := "async_magic_tricks"
+name := "async_and_scala"
 
 version := "1.0"
 
