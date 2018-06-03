@@ -77,10 +77,10 @@ object AsyncSuite extends BaseTestSuite {
         // After observation, it turns out that:
         //
         // 1. With 500 `AIO`:
-        //  - Monix and Cats uses at most `n` threads. On my 8 cores machine, sometimes it uses 6, sometimes 7, sometimes 8 but rarely 8.
+        //  - Monix and Cats use at most `n` threads. On my 8 cores machine, sometimes it uses 6, sometimes 7, sometimes 8 but rarely 8.
         //
         // 2. With 10.000 `AIO`:
-        //  - Monix and Cats uses `n` threads
+        //  - Monix and Cats use `n` threads
         //
         // `n` being the numbers of cores on your machine.
         //
