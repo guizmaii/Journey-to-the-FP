@@ -1,11 +1,13 @@
 package com.guizmaii.cats_io
 
-import cats.effect.IO
+import cats.effect.{Async, IO, Timer}
 import com.guizmaii.BaseTestSuite
 import com.guizmaii.utils.ScalaUtils.globalExecutionThreadPoolName
+import monix.execution.Scheduler
 import monix.execution.schedulers.TestScheduler
 
 import scala.collection.concurrent.TrieMap
+import scala.concurrent.ExecutionContext
 
 object BlockingIOSuite extends BaseTestSuite {
 
@@ -13,12 +15,17 @@ object BlockingIOSuite extends BaseTestSuite {
     assertEquals(true, true)
   }
 
-  import cats.syntax.apply._
-
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  object BlockingIO {
-    @inline final def apply[A](a: => A): IO[A] = IO.shift(_root_.monix.execution.Scheduler.io()) *> IO(a) <* IO.shift
+  val ioEC: Scheduler = _root_.monix.execution.Scheduler.io()
+
+  object ShiftedIO {
+
+    /**
+      * More info, see thread: https://twitter.com/guizmaii/status/1022819979606061058
+      */
+    @inline final def apply[F[_], A](ec: ExecutionContext)(a: => A)(implicit F: Async[F], timer: Timer[F]): F[A] =
+      F.bracket(Async.shift(ec))(_ => F.delay(a))(_ => timer.shift)
   }
 
   final val concurrentMap: TrieMap[String, String] = TrieMap.empty[String, String]
@@ -34,7 +41,7 @@ object BlockingIOSuite extends BaseTestSuite {
   testAsync("BlockingIO should execute its code on its Scheduler") { _ =>
     val f =
       IO.apply { body("a") }
-        .flatMap(_ => BlockingIO { body("b") })
+        .flatMap(_ => ShiftedIO[IO, Unit](ioEC) { body("b") })
         .flatMap(_ => IO.pure { body("c") })
         .flatMap(_ => IO.apply { body("d") })
 

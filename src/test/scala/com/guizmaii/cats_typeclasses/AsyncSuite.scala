@@ -39,11 +39,7 @@ object AsyncSuite extends BaseTestSuite {
   final val concurrentMap: TrieMap[String, String] = TrieMap.empty[String, String]
 
   object AIO {
-    // TODO Jules: Can we simplify this part ?
-    def apply[F[_]]()(implicit F: Sync[F], timer: Timer[F]): F[Unit] =
-      timer.shift >> F.delay {
-        concurrentMap.update(Thread.currentThread().getName, "")
-      }
+    def apply[F[_]]()(implicit F: Sync[F]): F[Unit] = F.delay { concurrentMap.update(Thread.currentThread().getName, "") }
   }
 
   override def tearDown(env: TestScheduler): Unit = {
