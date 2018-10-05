@@ -10,6 +10,8 @@ crossScalaVersions := Seq(scala211, scala212)
 
 scalafmtOnCompile in ThisBuild := true
 
+addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.7" cross CrossVersion.binary)
+
 libraryDependencies += "io.monix"          %% "monix"         % "3.0.0-RC1"
 libraryDependencies += "org.typelevel"     %% "cats-core"     % "1.4.0"
 libraryDependencies += "org.typelevel"     %% "cats-effect"   % "1.0.0"
