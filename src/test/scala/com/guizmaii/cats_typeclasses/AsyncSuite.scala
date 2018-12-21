@@ -1,7 +1,6 @@
 package com.guizmaii.cats_typeclasses
 
 import cats.Show
-import cats.effect.internals.IOContextShift
 import com.guizmaii.BaseTestSuite
 import monix.eval.Task
 import monix.execution.schedulers.TestScheduler
@@ -84,13 +83,13 @@ object AsyncSuite extends BaseTestSuite {
   testAsync("With Monix Task") { _ =>
     import monix.execution.Scheduler.Implicits.global
 
-    launchTest[Task](Monix)(_.runAsync.asInstanceOf[Future[Unit]])
+    launchTest[Task](Monix)(_.runToFuture.asInstanceOf[Future[Unit]])
   }
 
   testAsync("With Cats IO") { _ =>
     val globalEC: ExecutionContext = ExecutionContext.global
 
-    implicit val ctx: ContextShift[IO] = IOContextShift.apply(globalEC)
+    implicit val ctx: ContextShift[IO] = IO.contextShift(globalEC)
     implicit val timer: Timer[IO]      = IO.timer(globalEC)
 
     launchTest[IO](CatsEffect)(_.unsafeToFuture.asInstanceOf[Future[Unit]])

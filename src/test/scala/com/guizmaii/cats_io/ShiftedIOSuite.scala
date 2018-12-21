@@ -1,6 +1,5 @@
 package com.guizmaii.cats_io
 
-import cats.effect.internals.IOContextShift
 import com.guizmaii.BaseTestSuite
 import com.guizmaii.utils.ScalaUtils.globalExecutionThreadPoolName
 import monix.execution.Scheduler
@@ -20,7 +19,7 @@ object ShiftedIOSuite extends BaseTestSuite {
   val globalEC: ExecutionContext = ExecutionContext.global
   val ioEC: Scheduler            = _root_.monix.execution.Scheduler.io()
 
-  implicit val ctx: ContextShift[IO] = IOContextShift.apply(globalEC)
+  implicit val ctx: ContextShift[IO] = IO.contextShift(globalEC)
 
   object ShiftedIO {
     @inline final def apply[A](ec: ExecutionContext)(a: => A)(implicit cs: ContextShift[IO]): IO[A] = cs.evalOn(ec)(IO(a))
