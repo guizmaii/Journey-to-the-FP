@@ -1,4 +1,4 @@
-name := "async_and_scala"
+name := "Journey-to-the-FP"
 
 version := "1.0"
 
