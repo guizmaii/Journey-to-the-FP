@@ -44,7 +44,7 @@ object BlockingTaskSuite extends BaseTestSuite {
 
     assertEquals(concurrentMap.isEmpty, true)
 
-    f.runAsync.map { _ =>
+    f.runToFuture.map { _ =>
       assert(concurrentMap("a").contains(globalExecutionThreadPoolName))
       assert(concurrentMap("b").contains("monix-io"))
       assert(concurrentMap("c").contains(globalExecutionThreadPoolName))
