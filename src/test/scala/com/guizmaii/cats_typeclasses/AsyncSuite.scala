@@ -36,10 +36,6 @@ object AsyncSuite extends BaseTestSuite {
 
   final val concurrentMap: TrieMap[String, String] = TrieMap.empty[String, String]
 
-  object AIO {
-    def apply[F[_]: Sync](): F[Unit] = Sync[F].delay { concurrentMap.update(Thread.currentThread().getName, "") }
-  }
-
   override def tearDown(env: TestScheduler): Unit = {
     concurrentMap.clear()
     super.tearDown(env)
@@ -49,7 +45,7 @@ object AsyncSuite extends BaseTestSuite {
       effectSystem: EffectSystem
   )(runAsync: F[_] => Future[Unit])(implicit show: Show[EffectSystem]): Future[Unit] = {
 
-    val f = (0 to 500).toList.parTraverse(_ => AIO.apply())
+    val f = (0 to 500).toList.parTraverse(_ => Sync[F].delay { concurrentMap.update(Thread.currentThread().getName, "") })
 
     assertEquals(concurrentMap.isEmpty, true)
 
