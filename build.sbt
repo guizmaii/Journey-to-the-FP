@@ -2,7 +2,7 @@ name := "async_and_scala"
 
 version := "1.0"
 
-lazy val scala212 = "2.12.7"
+lazy val scala212 = "2.12.8"
 lazy val scala211 = "2.11.12"
 
 scalaVersion := scala212
