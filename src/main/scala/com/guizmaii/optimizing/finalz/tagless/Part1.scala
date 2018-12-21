@@ -4,7 +4,7 @@ import monix.eval.Task
 /**
   * Study of https://typelevel.org/blog/2017/12/27/optimizing-final-tagless.html
   */
-object Main extends App {
+object Part1 extends App {
 
   import cats._
   import cats.data._
